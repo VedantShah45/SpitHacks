@@ -6,8 +6,10 @@ import {
   SandpackCodeEditor,
   SandpackPreview,
   SandpackConsole,
+  useActiveCode,
+  useSandpack,
 } from "@codesandbox/sandpack-react";
-import { ChevronsUpDown, Terminal, Play, Plus} from 'lucide-react';
+import { ChevronsUpDown, Terminal, Play, Plus } from 'lucide-react';
 import { FileTree } from '@/app/components/fileTree';
 
 const WebIDE = () => {
@@ -18,7 +20,7 @@ const WebIDE = () => {
     "/src/components/Button.js": `export default function Button({ children }) {
   return <button className="px-4 py-2 bg-blue-500 rounded">{children}</button>
 }`,
-"/src/components/button/newButton.js": `export default function Button({ children }) {
+    "/src/components/button/newButton.js": `export default function Button({ children }) {
   return <button className="px-4 py-2 bg-blue-500 rounded">{children}</button>
 }`,
     "/src/styles/main.css": `body {
@@ -27,8 +29,12 @@ const WebIDE = () => {
 }`,
   });
   
-  const [activeFile, setActiveFile] = useState("/src/components/Button.js");
+  const [activeFile, setActiveFile] = useState("");
   const [showConsole, setShowConsole] = useState(false);
+
+  const handleFileChange = (newFile) => {
+    setActiveFile(newFile);
+  };
   
   const addNewFile = () => {
     const path = prompt("Enter file path (e.g., src/components/NewFile.js):");
@@ -77,9 +83,10 @@ const WebIDE = () => {
         theme="dark"
         template="react"
         options={{
-          activeFile,
+          activeFile: activeFile,
           visibleFiles: Object.keys(files),
-          showRunButton: false,
+          recompileMode: "immediate",
+          recompileDelay: 300,
         }}
       >
         <div className="flex-1 flex">
@@ -97,7 +104,7 @@ const WebIDE = () => {
               <FileTree
                 files={files}
                 activeFile={activeFile}
-                onFileClick={setActiveFile}
+                onFileClick={handleFileChange}
                 onDelete={deleteFile}
               />
             </div>
@@ -107,11 +114,12 @@ const WebIDE = () => {
             <SandpackLayout>
               <div className="flex-1">
                 <SandpackCodeEditor 
-                  showTabs={false}
+                  showTabs
                   showLineNumbers={true}
                   showInlineErrors={true}
                   wrapContent={true}
                   closableTabs={true}
+                  activeFile={activeFile}
                 />
               </div>
             </SandpackLayout>
